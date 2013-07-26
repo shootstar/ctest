@@ -30,6 +30,7 @@ import eventlet
 import logging as std_logging
 from oslo.config import cfg
 
+from ceilometer.logger import logger
 from ceilometer.openstack.common import eventlet_backdoor
 from ceilometer.openstack.common.gettextutils import _
 from ceilometer.openstack.common import importutils
@@ -323,6 +324,8 @@ class Service(object):
 
 
 def launch(service, workers=None):
+    logger.debug("launch")
+    logger.debug("workers:{}".format(workers))
     if workers:
         launcher = ProcessLauncher()
         launcher.launch_service(service, workers=workers)

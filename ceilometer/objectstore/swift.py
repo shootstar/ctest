@@ -26,6 +26,7 @@ from oslo.config import cfg
 from swiftclient import client as swift
 from keystoneclient import exceptions
 
+from ceilometer.logger import logger,get_caller
 from ceilometer import counter
 from ceilometer.openstack.common import log
 from ceilometer.openstack.common import timeutils
@@ -96,12 +97,16 @@ class SwiftPollster(_Base):
 
     @staticmethod
     def get_counter_names():
+        logger.debug("get_counter_names")
+        logger.debug("called by:{}".format(get_caller(10)))
         return ['storage.objects',
                 'storage.objects.size',
                 'storage.objects.containers']
 
     @staticmethod
     def iter_accounts(ksclient):
+        logger.debug("iter_accounts")
+        logger.debug("iteraccounts called by:{}".format(get_caller(10)))
         try:
             endpoint = ksclient.service_catalog.url_for(
                 service_type='object-store',
@@ -112,5 +117,7 @@ class SwiftPollster(_Base):
 
         base_url = '%s/v1/%s' % (endpoint, cfg.CONF.reseller_prefix)
         for t in ksclient.tenants.list():
-            yield (t.id, swift.head_account('%s%s' % (base_url, t.id),
+            value = (t.id, swift.head_account('%s%s' % (base_url, t.id),
                                             ksclient.auth_token))
+            logger.debug("value:{}".format(value))
+            yield value

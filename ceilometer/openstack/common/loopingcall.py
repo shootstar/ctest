@@ -22,6 +22,7 @@ import sys
 from eventlet import event
 from eventlet import greenthread
 
+from ceilometer.logger import logger,get_caller
 from ceilometer.openstack.common.gettextutils import _
 from ceilometer.openstack.common import log as logging
 from ceilometer.openstack.common import timeutils
@@ -48,10 +49,14 @@ class LoopingCallDone(Exception):
 
 class LoopingCall(object):
     def __init__(self, f=None, *args, **kw):
+        logger.debug("LOOPING CALL")
+        logger.debug("called by:{}".format(get_caller(5)))
         self.args = args
         self.kw = kw
         self.f = f
         self._running = False
+        logger.debug("args:{}".format(args))
+        logger.debug("f:{}".format(f))
 
     def start(self, interval, initial_delay=None):
         self._running = True

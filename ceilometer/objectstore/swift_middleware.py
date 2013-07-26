@@ -57,6 +57,7 @@ except ImportError:
     # Swift <= 1.7.5 ... module exists and has class.
     from swift.common.middleware.proxy_logging import InputProxy
 
+from ceilometer.logger import logger,get_caller
 from ceilometer import counter
 from ceilometer.openstack.common import context
 from ceilometer.openstack.common import timeutils
@@ -70,8 +71,9 @@ class CeilometerMiddleware(object):
     """
 
     def __init__(self, app, conf):
+        logger.debug("CEILOMETER MIDDLEWARE")
         self.app = app
-
+        logger.debug("self.app:{}".format(self.app))
         self.metadata_headers = [h.strip().replace('-', '_').lower()
                                  for h in conf.get(
                                      "metadata_headers",
@@ -83,18 +85,22 @@ class CeilometerMiddleware(object):
             check_func=lambda x: True,
             invoke_on_load=True,
         )
-
+        logger.debug("publish manager:{}".format(publisher_manager))
         self.pipeline_manager = pipeline.setup_pipeline(publisher_manager)
+        logger.debug("self.pipeline_manager:{}".format(self.pipeline_manager))
 
     def __call__(self, env, start_response):
+        logger.debug("Ceilometer __call__")
         start_response_args = [None]
         input_proxy = InputProxy(env['wsgi.input'])
         env['wsgi.input'] = input_proxy
+        logger.debug("input_proxy:{}".format("input_proxy"))
 
         def my_start_response(status, headers, exc_info=None):
             start_response_args[0] = (status, list(headers), exc_info)
 
         def iter_response(iterable):
+            logger.debug("iter_response")
             if start_response_args[0]:
                 start_response(*start_response_args[0])
             bytes_sent = 0
@@ -104,19 +110,23 @@ class CeilometerMiddleware(object):
                         bytes_sent += len(chunk)
                     yield chunk
             finally:
+                logger.debug("received:{},send:{}".format(input_proxy.bytes_received,bytes_sent))
                 self.publish_counter(env,
                                      input_proxy.bytes_received,
                                      bytes_sent)
 
         try:
             iterable = self.app(env, my_start_response)
-        except Exception:
+        except Exception,e:
+            logger.debug("EXCEPTION:{}".format(e))
             self.publish_counter(env, input_proxy.bytes_received, 0)
             raise
         else:
+            logger.debug("else")
             return iter_response(iterable)
 
     def publish_counter(self, env, bytes_received, bytes_sent):
+        logger.debug("publish counter")
         req = REQUEST.Request(env)
         version, account, container, obj = split_path(req.path, 1, 4, True)
         now = timeutils.utcnow().isoformat()
@@ -138,6 +148,7 @@ class CeilometerMiddleware(object):
                 cfg.CONF.counter_source,
                 self.pipeline_manager.pipelines,
         ) as publisher:
+            logger.debug("publisher:{}".format(publisher))
             if bytes_received:
                 publisher([counter.Counter(
                     name='storage.objects.incoming.bytes',

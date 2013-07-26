@@ -18,7 +18,7 @@
 
 from keystoneclient.v2_0 import client as ksclient
 from oslo.config import cfg
-
+from ceilometer.logger import logger
 from ceilometer import agent
 from ceilometer import extension_manager
 from ceilometer.openstack.common import log
@@ -39,6 +39,8 @@ LOG = log.getLogger(__name__)
 
 class PollingTask(agent.PollingTask):
     def poll_and_publish(self):
+        logger.debug("poll and publish self:{}".format(self))
+        logger.debug("self.pollsters:{}".format(self.pollsters))
         """Tasks to be run at a periodic interval."""
         with self.publish_context as publisher:
             # TODO(yjiang5) passing counters into get_counters to avoid
@@ -57,6 +59,7 @@ class PollingTask(agent.PollingTask):
 class AgentManager(agent.AgentManager):
 
     def __init__(self):
+        logger.debug("AGENT MANAGER")
         super(AgentManager, self).__init__(
             extension_manager.ActivatedExtensionManager(
                 namespace='ceilometer.poll.central',

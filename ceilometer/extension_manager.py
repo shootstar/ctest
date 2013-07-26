@@ -20,6 +20,7 @@
 
 from stevedore import enabled
 
+from ceilometer.logger import logger
 from ceilometer.openstack.common import log
 
 
@@ -61,7 +62,8 @@ class ActivatedExtensionManager(enabled.EnabledExtensionManager):
 
         def local_check_func(ext):
             return should_use_extension(namespace, ext, disabled_names)
-
+        logger.debug("ACTIVATED EXTENSION MANAGER")
+        logger.debug("namespace:{} check_func:{},invoke_on_load:{}".format(namespace,local_check_func,invoke_on_load)) 
         super(ActivatedExtensionManager, self).__init__(
             namespace=namespace,
             check_func=local_check_func,
