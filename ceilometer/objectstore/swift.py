@@ -57,6 +57,8 @@ class _Base(plugin.PollsterBase):
     def get_counters(self, manager):
         #ここpoll_and_publishで必ず呼ばれるけれど
         #abc.abstractmethodではない？
+
+        #10分単位?
         for tenant, account in self.iter_accounts(manager.keystone):
             yield counter.Counter(
                 name='storage.objects',

@@ -112,6 +112,7 @@ class CeilometerMiddleware(object):
                         bytes_sent += len(chunk)
                     yield chunk
             finally:
+                #downloadは1回,uploadは数回。なぜ？
                 logger.debug("received:{},send:{}".format(input_proxy.bytes_received,bytes_sent))
                 self.publish_counter(env,
                                      input_proxy.bytes_received,
