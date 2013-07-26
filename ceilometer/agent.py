@@ -97,6 +97,8 @@ class AgentManager(object):
         self.service = service
         for interval, task in self.setup_polling_tasks().iteritems():
             logger.debug("intervak:{} task:{}".format(interval,task))
+
+            #openstack.common.threadgroup.pyなどが呼ばれる
             self.service.tg.add_timer(interval,
                                       self.interval_task,
                                       task=task)

@@ -72,6 +72,7 @@ class CeilometerMiddleware(object):
 
     def __init__(self, app, conf):
         logger.debug("CEILOMETER MIDDLEWARE")
+        logger.debug("CEILOMETER MIDDLEWARE INIT called by:{}".format(get_caller(10)))
         self.app = app
         logger.debug("self.app:{}".format(self.app))
         self.metadata_headers = [h.strip().replace('-', '_').lower()
@@ -91,6 +92,7 @@ class CeilometerMiddleware(object):
 
     def __call__(self, env, start_response):
         logger.debug("Ceilometer __call__")
+        logger.debug("CEILOMETER MIDDLEWARE CALL called by:{}".format(get_caller(10)))
         start_response_args = [None]
         input_proxy = InputProxy(env['wsgi.input'])
         env['wsgi.input'] = input_proxy

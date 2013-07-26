@@ -39,8 +39,10 @@ LOG = log.getLogger(__name__)
 
 class PollingTask(agent.PollingTask):
     def poll_and_publish(self):
+        #ceilometer or centralのAgentManagerのinterval_task()から
         logger.debug("poll and publish self:{}".format(self))
         logger.debug("self.pollsters:{}".format(self.pollsters))
+
         """Tasks to be run at a periodic interval."""
         with self.publish_context as publisher:
             # TODO(yjiang5) passing counters into get_counters to avoid
@@ -71,6 +73,7 @@ class AgentManager(agent.AgentManager):
         return PollingTask(self)
 
     def interval_task(self, task):
+        #openstack.common.loopingcall.pyなどから呼ばれる
         self.keystone = ksclient.Client(
             username=cfg.CONF.os_username,
             password=cfg.CONF.os_password,

@@ -53,7 +53,7 @@ class LoopingCall(object):
         logger.debug("called by:{}".format(get_caller(5)))
         self.args = args
         self.kw = kw
-        self.f = f
+        self.f = f #ceilometer.central.manager.AgentManagerなど
         self._running = False
         logger.debug("args:{}".format(args))
         logger.debug("f:{}".format(f))

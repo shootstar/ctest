@@ -55,6 +55,8 @@ class _Base(plugin.PollsterBase):
         """Iterate over all accounts, yielding (tenant_id, stats) tuples."""
 
     def get_counters(self, manager):
+        #ここpoll_and_publishで必ず呼ばれるけれど
+        #abc.abstractmethodではない？
         for tenant, account in self.iter_accounts(manager.keystone):
             yield counter.Counter(
                 name='storage.objects',
@@ -97,8 +99,17 @@ class SwiftPollster(_Base):
 
     @staticmethod
     def get_counter_names():
+        """
+        setup.pyのentry-pointに書いてあるのでPollAgentから呼ばれる。
+　　　　　実際に呼ぶのは,agent.pyのsetup_polling_tasks内から。
+        :return:
+        """
+        """
+        :return:
+        """
         logger.debug("get_counter_names")
         logger.debug("called by:{}".format(get_caller(10)))
+
         return ['storage.objects',
                 'storage.objects.size',
                 'storage.objects.containers']
